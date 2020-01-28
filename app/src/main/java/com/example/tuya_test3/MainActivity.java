@@ -17,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -36,7 +35,6 @@ import com.tuya.smart.sdk.api.ITuyaDevice;
 import com.tuya.smart.sdk.bean.DeviceBean;
 import com.tuya.smart.sdk.enums.TYDevicePublishModeEnum;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -82,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
     Spinner listHome;
     Spinner listDevices;
 
+    Button buttonPair;
+    Button buttonControl;
+
 
 
 
@@ -98,6 +99,11 @@ public class MainActivity extends AppCompatActivity {
 
         listHome = findViewById(R.id.listHome);
         listDevices = findViewById(R.id.listDevices);
+
+        buttonPair = findViewById(R.id.ButtonPair);
+        buttonControl = findViewById(R.id.ButtonControl);
+
+
 
 
 
@@ -123,8 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        final Button pairBut = (Button) findViewById(R.id.pairBut);
-        pairBut.setOnClickListener(new View.OnClickListener() {
+        buttonPair.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent p = new Intent(getBaseContext(), PairView.class);
@@ -132,9 +137,6 @@ public class MainActivity extends AppCompatActivity {
                 //Přiřadit zařízení k právě vybranému domu
                 p.putExtra("hid", chosenHome.getHomeId());
 
-                //EZ/AP pair mode
-                RadioButton ez = findViewById(R.id.radioButtonEZ);
-                p.putExtra("ez", ez.isChecked());
 
                 startActivityForResult(p, 1);
 
@@ -144,8 +146,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Po stisknutí tlačítka Control se odešle příkaz s dpID 1 a hodnotou true/false do právě vybraného zařízení
-        final Button controlBut = (Button) findViewById(R.id.controlBut);
-        controlBut.setOnClickListener(new View.OnClickListener() {
+
+        buttonControl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Vytvořit instanci právě vybraného zařízení
@@ -154,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
                 HashMap<String, Object > hashMap = new HashMap<>();
                 hashMap.put("1",stat);
                 stat = !stat;
+
                 //Odeslat příkaz
                 mdevice.publishDps(JSONObject.toJSONString(hashMap), new IResultCallback() {
                     @Override
@@ -321,6 +324,8 @@ public class MainActivity extends AppCompatActivity {
 
                     //Vybrání id prvního domu ze seznamu
                     hid = beans.get(0).getHomeId();
+                    //Povolit tlačítko párování
+                    buttonPair.setEnabled(true);
 
 
                     //Načtení zařízení v domě
@@ -331,6 +336,8 @@ public class MainActivity extends AppCompatActivity {
 
                 else {
                     editTextLog.setText("NO HOMES");
+                    //zakázat tlačítko párování
+                    buttonPair.setEnabled(false);
                 }
 
 
@@ -378,13 +385,19 @@ public class MainActivity extends AppCompatActivity {
                         registerDeviceListener(d.getDevId());
                     }
 
+
                     //Spuštění funkce pro testování propustnosti serveru
                     //sendFalse();
+
+                    //Povolit tlačítko pro ovládání prvku
+                    buttonControl.setEnabled(true);
                 }
                 else
                 {
                     arr = new String[1];
                     arr[0] = "NO DEVICES";
+                    //Zakázat tlačítko pro ovládání prvku
+                    buttonControl.setEnabled(false);
                 }
 
                 //Nastavení seznamu zařízení do spinneru
